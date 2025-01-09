@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { Star, StarOff, Search } from 'lucide-react';
@@ -8,29 +9,29 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from "./ui/dialog.tsx";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "./ui/card";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+} from "./ui/card.tsx";
+import { Input } from "./ui/input.tsx";
+import { Button } from "./ui/button.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./ui/select.tsx";
 
 const CountriesApp = () => {
   const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchType, setSearchType] = useState('name');
+  const [searchType, setSearchType] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favoriteCountries');
@@ -96,7 +97,8 @@ const CountriesApp = () => {
         />
       ),
       sortable: false,
-      filter: false
+      filter: false,
+      cellStyle: {display: 'flex'}
     },
     {
       field: 'name.common',
@@ -126,38 +128,60 @@ const CountriesApp = () => {
       headerName: 'Currencies',
       valueFormatter: (params) => {
         const curr = params.data.currencies;
-        return curr ? Object.entries(curr).map(c => "test").join(', ') : '';
+        return curr ? Object.values(curr).map(c => c.name).join(', ') : '';
       },
       sortable: true,
       filter: true
     }
   ], [favorites]);
 
+
   // Filter countries based on search
   const filteredCountries = useMemo(() => {
+    console.log("countries", countries)
+
     if (!searchTerm) return showOnlyFavorites ?
       countries.filter(c => favorites.includes(c.cca3)) :
       countries;
 
+    const checkName = (country, searchTerm) => {
+      console.log("checkName", country, searchTerm)
+      return country.name.common.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    const checkLanguage = (country, searchTerm) => {
+      return country.languages &&
+        Object.values(country.languages)
+          .some(lang => lang.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    const checkCurrency = (country, searchTerm) => {
+      return country.currencies &&
+        Object.values(country.currencies)
+          .some(curr => curr.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+
     return countries.filter(country => {
       if (showOnlyFavorites && !favorites.includes(country.cca3)) return false;
 
+      console.log("searchType", searchType)
+
       switch (searchType) {
+        case 'all':
+          return checkName(country, searchTerm) ||
+            checkLanguage(country, searchTerm) ||
+            checkCurrency(country, searchTerm);
         case 'name':
-          return country.name.common.toLowerCase().includes(searchTerm.toLowerCase());
+          return checkName(country, searchTerm);
         case 'language':
-          return country.languages &&
-            Object.values(country.languages)
-              .some(lang => lang.toLowerCase().includes(searchTerm.toLowerCase()));
+          return checkLanguage(country, searchTerm);
         case 'currency':
-          return country.currencies &&
-            Object.values(country.currencies)
-              .some(curr => curr.name.toLowerCase().includes(searchTerm.toLowerCase()));
+          return checkCurrency(country, searchTerm);
         default:
           return true;
       }
     });
   }, [countries, searchTerm, searchType, favorites, showOnlyFavorites]);
+
+  console.log("filteredCountries", filteredCountries)
 
   const toggleFavorite = (countryCode) => {
     setFavorites(prev =>
@@ -203,6 +227,7 @@ const CountriesApp = () => {
                 <SelectValue placeholder="Search by..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="name">Name</SelectItem>
                 <SelectItem value="language">Language</SelectItem>
                 <SelectItem value="currency">Currency</SelectItem>
@@ -226,12 +251,16 @@ const CountriesApp = () => {
               pagination={true}
               paginationPageSize={10}
               onRowClicked={(params) => setSelectedCountry(params.data)}
+              paginationPageSizeSelector ={[10, 20, 50, 100]}
               defaultColDef={{
                 flex: 1,
                 minWidth: 100,
                 resizable: true,
               }}
             />
+
+            {/*{JSON.stringify(filteredCountries)}*/}
+
           </div>
         </CardContent>
       </Card>

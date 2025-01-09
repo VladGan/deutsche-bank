@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import CountriesApp from "./components/CountriesApp";
+import CountriesApp from "./components/CountriesApp.tsx";
 
 function App() {
   return (
