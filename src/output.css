@@ -1199,29 +1199,6 @@ html {
   animation-delay: 0.5s;
 }
 
-/* Custom scrollbar styles */
-
-@media (min-width: 768px) {
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: rgb(var(--muted));
-    border-radius: var(--radius);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: rgb(var(--muted-foreground) / 0.3);
-    border-radius: var(--radius);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgb(var(--muted-foreground) / 0.5);
-  }
-}
-
 /* Custom utilities */
 
 /* Focus styles */
@@ -1252,6 +1229,10 @@ html {
 }
 
 /* Responsive font sizes */
+
+.ag-cell-focus {
+  border: none !important;
+}
 
 .file\:border-0::-webkit-file-upload-button {
   border-width: 0px !important;

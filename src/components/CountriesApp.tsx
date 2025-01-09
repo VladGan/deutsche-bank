@@ -72,7 +72,6 @@ const CountriesApp = () => {
           variant="ghost"
           size="icon"
           onClick={(e) => {
-            e.stopPropagation();
             toggleFavorite(params.data.cca3);
           }}
         >
@@ -117,10 +116,10 @@ const CountriesApp = () => {
       field: 'languages',
       headerName: 'Languages',
       valueFormatter: (params) => {
-        const langs = params.data.languages;
+        const langs = params?.data?.languages;
         return langs ? Object.values(langs).join(', ') : '';
       },
-      sortable: true,
+      sortable: false,
       filter: true
     },
     {
@@ -138,14 +137,11 @@ const CountriesApp = () => {
 
   // Filter countries based on search
   const filteredCountries = useMemo(() => {
-    console.log("countries", countries)
-
     if (!searchTerm) return showOnlyFavorites ?
       countries.filter(c => favorites.includes(c.cca3)) :
       countries;
 
     const checkName = (country, searchTerm) => {
-      console.log("checkName", country, searchTerm)
       return country.name.common.toLowerCase().includes(searchTerm.toLowerCase());
     }
     const checkLanguage = (country, searchTerm) => {
@@ -161,8 +157,6 @@ const CountriesApp = () => {
 
     return countries.filter(country => {
       if (showOnlyFavorites && !favorites.includes(country.cca3)) return false;
-
-      console.log("searchType", searchType)
 
       switch (searchType) {
         case 'all':
@@ -180,8 +174,6 @@ const CountriesApp = () => {
       }
     });
   }, [countries, searchTerm, searchType, favorites, showOnlyFavorites]);
-
-  console.log("filteredCountries", filteredCountries)
 
   const toggleFavorite = (countryCode) => {
     setFavorites(prev =>
@@ -250,7 +242,9 @@ const CountriesApp = () => {
               columnDefs={columnDefs}
               pagination={true}
               paginationPageSize={10}
-              onRowClicked={(params) => setSelectedCountry(params.data)}
+              onRowClicked={(params) => {
+                return setSelectedCountry(params.data)
+              }}
               paginationPageSizeSelector ={[10, 20, 50, 100]}
               defaultColDef={{
                 flex: 1,
@@ -258,9 +252,6 @@ const CountriesApp = () => {
                 resizable: true,
               }}
             />
-
-            {/*{JSON.stringify(filteredCountries)}*/}
-
           </div>
         </CardContent>
       </Card>
