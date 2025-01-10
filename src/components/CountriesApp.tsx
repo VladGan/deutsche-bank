@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css';
@@ -33,10 +33,13 @@ const CountriesApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const onRowClicked = useCallback((params) => setSelectedCountry(params.data), []);
+
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favoriteCountries');
     return saved ? JSON.parse(saved) : [];
   });
+
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   // Fetch countries data
@@ -136,6 +139,7 @@ const CountriesApp = () => {
 
 
   // Filter countries based on search
+  // useMemo vs useState
   const filteredCountries = useMemo(() => {
     if (!searchTerm) return showOnlyFavorites ?
       countries.filter(c => favorites.includes(c.cca3)) :
@@ -242,9 +246,8 @@ const CountriesApp = () => {
               columnDefs={columnDefs}
               pagination={true}
               paginationPageSize={10}
-              onRowClicked={(params) => {
-                return setSelectedCountry(params.data)
-              }}
+              // put in state
+              onRowClicked={onRowClicked}
               paginationPageSizeSelector ={[10, 20, 50, 100]}
               defaultColDef={{
                 flex: 1,
