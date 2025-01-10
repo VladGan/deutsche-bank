@@ -218,7 +218,7 @@ const CountriesApp = () => {
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Search by..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent >
                 <SelectItem value="all">All</SelectItem>
                 <SelectItem value="name">Name</SelectItem>
                 <SelectItem value="language">Language</SelectItem>
